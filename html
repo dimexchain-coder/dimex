@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staking DApp Demo</title>
+    <!-- Web3Modal / WalletConnect CDNs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f4f4f9; }
+        .card { background: white; padding: 30px; border-radius: 12px; max-width: 400px; margin: 0 auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        button { width: 100%; padding: 12px; margin: 10px 0; font-size: 16px; border: none; border-radius: 6px; cursor: pointer; transition: 0.3s; }
+        .btn-connect { background-color: #3b82f6; color: white; }
+        .btn-stake { background-color: #10b981; color: white; }
+        .btn-claim { background-color: #f59e0b; color: white; }
+        button:hover { opacity: 0.9; }
+        #status { margin-top: 15px; font-weight: bold; color: #333; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Staking Demo DApp</h2>
+        <p id="status">வாலட் இணைக்கப்படவில்லை</p>
+
+        <button class="btn-connect" onclick="connectWallet()">Connect Wallet</button>
+        <button class="btn-stake" onclick="handleStake()">Stake Demo</button>
+        <button class="btn-claim" onclick="handleClaim()">Claim Demo</button>
+    </div>
+
+    <script>
+        // உங்கள் WalletConnect Project ID
+        const PROJECT_ID = "5f72a68ee1e612012cff5f06b3409a6f"; 
+        
+        let userAddress = null;
+        let provider = null;
+
+        // 1. வாலட் இணைக்கும் செயல்பாடு
+        async function connectWallet() {
+            try {
+                if (window.ethereum) {
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    const accounts = await provider.send("eth_requestAccounts", []);
+                    userAddress = accounts[0];
+                    
+                    document.getElementById("status").innerText = "இணைக்கப்பட்டது: " + userAddress.substring(0, 6) + "..." + userAddress.substring(userAddress.length - 4);
+                    document.getElementById("status").style.color = "green";
+                    alert("வாலட் வெற்றிகரமாக இணைக்கப்பட்டது!");
+                } else {
+                    alert("பிரவுசரில் மெட்டாமாஸ்க் அல்லது டிரஸ்ட் வாலட் இல்லை. மொபைல் ஆப்பிற்குள் திறக்கவும்.");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("வாலட் இணைப்பில் பிழை ஏற்பட்டுள்ளது.");
+            }
+        }
+
+        // 2. Stake கிளிக் செய்யும்போது இயங்கும் பங்க்ஷன்
+        async function handleStake() {
+            if (!userAddress) {
+                alert("முதலில் வாலட்டை இணைக்கவும்!");
+                return;
+            }
+
+            // மொபைலில் ஆட்டோ ஓபன் ஆக டீப் லிங்க் தூண்டுதல்
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            if (isMobile) {
+                window.location.href = "https://link.trustwallet.com/open_url?url=" + encodeURIComponent(window.location.href);
+            }
+
+            alert("Stake Pop-up தூண்டப்படுகிறது! வாலட்டை கன்ஃபார்ம் செய்யவும்.");
+        }
+
+        // 3. Claim கிளிக் செய்யும்போது இயங்கும் பங்க்ஷன்
+        async function handleClaim() {
+            if (!userAddress) {
+                alert("முதலில் வாலட்டை இணைக்கவும்!");
+                return;
+            }
+
+            // மொபைலில் ஆட்டோ ஓபன் ஆக டீப் லிங்க் தூண்டுதல்
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            if (isMobile) {
+                window.location.href = "https://link.trustwallet.com/open_url?url=" + encodeURIComponent(window.location.href);
+            }
+
+            alert("Claim Pop-up தூண்டப்படுகிறது! வாலட்டை கன்ஃபார்ம் செய்யவும்.");
+        }
+    </script>
+
+</body>
+</html>
