@@ -3,71 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web3 350+ Wallet Selector</title>
-    
-    <!-- WalletConnect AppKit & Ethers Standalone Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.10.1/dist/index.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <title>Web3 Staking DApp</title>
+    <!-- Web3Modal மற்றும் Ethers.js க்கான CDN இணைப்புகள் -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script src="https://unpkg.com/@web3modal/ethereum@2.7.1/dist/index.umd.min.js"></script>
+    <script src="https://unpkg.com/@web3modal/core@2.7.1/dist/index.umd.min.js"></script>
     
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
-        body { background: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .card { background: #1e293b; border: 1px solid #334155; border-radius: 20px; padding: 30px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.5); }
+        body { background: #0b0f19; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .card { background: #151c2c; border: 1px solid #232d42; border-radius: 20px; padding: 30px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.6); }
         h2 { color: #38bdf8; font-size: 22px; margin-bottom: 8px; }
         p { color: #94a3b8; font-size: 13px; margin-bottom: 20px; }
-        .status { background: #0f172a; border: 1px solid #334155; padding: 12px; border-radius: 10px; font-size: 13px; color: #f59e0b; word-break: break-all; margin-bottom: 20px; font-weight: 600; }
+        .status { background: #0b0f19; border: 1px solid #232d42; padding: 14px; border-radius: 12px; font-size: 13px; color: #f59e0b; word-break: break-all; margin-bottom: 20px; font-weight: 600; }
         button { width: 100%; padding: 14px; margin: 8px 0; font-size: 15px; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; transition: 0.2s; }
-        .btn-connect { background: #2563eb; color: white; }
-        .btn-stake { background: #10b981; color: white; }
-        .btn-claim { background: #f59e0b; color: white; }
+        .btn-connect { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; box-shadow: 0 4px 15px rgba(37,99,235,0.3); }
+        .btn-stake { background: linear-gradient(135deg, #10b981, #047857); color: white; box-shadow: 0 4px 15px rgba(16,185,129,0.3); }
+        .btn-claim { background: linear-gradient(135deg, #f59e0b, #b45309); color: white; box-shadow: 0 4px 15px rgba(245,158,11,0.3); }
         button:active { transform: scale(0.98); }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h2>Web3 Multi-Wallet DApp</h2>
-        <p>350+ வாலட்களில் இருந்து தேர்ந்தெடுக்கும் முறை</p>
+        <h2>Staking DApp</h2>
+        <p>வாலட் தேர்வு செய்யும் முறை (Wallet Selection)</p>
 
         <div id="status" class="status">வாலட் இணைக்கப்படவில்லை</div>
 
-        <button class="btn-connect" onclick="connectWithWalletList()">🔗 Connect Wallet ( Select Wallet )</button>
-        <button class="btn-stake" onclick="handleTx('Stake')">⚡ Stake Demo</button>
-        <button class="btn-claim" onclick="handleTx('Claim')">🎁 Claim Demo</button>
+        <button class="btn-connect" onclick="openWalletModal()">🔗 Connect Wallet</button>
+        <button class="btn-stake" onclick="handleTransaction('Stake')">⚡ Stake Demo</button>
+        <button class="btn-claim" onclick="handleTransaction('Claim')">🎁 Claim Demo</button>
     </div>
 
     <script>
+        // உங்கள் WalletConnect Project ID
         const PROJECT_ID = "5f72a68ee1e612012cff5f06b3409a6f";
-        let wcProvider = null;
-        let ethersProvider = null;
+
+        let web3Modal = null;
+        let provider = null;
+        let signer = null;
         let userAddress = null;
 
-        // 350+ வாலட்களின் பாப்-அப் பட்டியலைத் திறக்கும் பங்க்ஷன்
-        async function connectWithWalletList() {
-            const statusEl = document.getElementById("status");
-            statusEl.innerText = "வாலட் பட்டியல் திரையில் திறக்கப்படுகிறது...";
-            statusEl.style.color = "#38bdf8";
-
+        // Web3Modal அமைப்புகளைத் தொடங்குதல்
+        window.addEventListener('DOMContentLoaded', async () => {
             try {
-                // WalletConnect Ethereum Provider அமைப்பு
-                wcProvider = await WalletConnectProvider.EthereumProvider.init({
+                const chains = [56]; // BNB Chain (Binance Smart Chain)
+                const totalSupplyModal = window.Web3ModalCore;
+                
+                // WalletConnect Provider கட்டமைத்தல்
+                const walletConnectProvider = new window.EthereumProvider({
                     projectId: PROJECT_ID,
-                    chains: [56], // BNB Chain (1 - Ethereum, 137 - Polygon)
-                    showQrModal: true, // இதுதான் 350+ வாலட்களின் பாப்-அப் பட்டியலைக் கொண்டுவரும்
-                    metadata: {
-                        name: "Staking DApp Demo",
-                        description: "Web3 Wallet Connect",
-                        url: window.location.href,
-                        icons: ["https://walletconnect.com/walletconnect-logo.png"]
-                    }
+                    chains: chains,
+                    showQrModal: true
                 });
 
-                // வாலட் பட்டியலின் பாப்-அப்பை திரையில் திறக்கிறது
-                await wcProvider.enable();
+                web3Modal = new window.Web3Modal.Web3Modal({
+                    projectId: PROJECT_ID,
+                    themeMode: "dark",
+                    themeColor: "blue",
+                    chains: chains
+                });
+            } catch (err) {
+                console.error("Initialization Error:", err);
+            }
+        });
 
-                // இணைக்கப்பட்ட தகவல்களைப் பெறுவது
-                ethersProvider = new ethers.providers.Web3Provider(wcProvider);
-                const signer = ethersProvider.getSigner();
+        // 1. Connect Wallet பட்டனை அழுத்தும்போது வாலட் பட்டியல் பாப்-அப் திறக்கும்
+        async function openWalletModal() {
+            try {
+                const statusEl = document.getElementById("status");
+                statusEl.innerText = "வாலட் பட்டியல் திறக்கப்படுகிறது...";
+                statusEl.style.color = "#38bdf8";
+
+                // Web3Modal ஓபன் செய்து வாலட் பட்டியலைக் காட்டுதல்
+                const modalProvider = await web3Modal.openModal();
+                
+                if (!modalProvider) {
+                    statusEl.innerText = "வாலட் தேர்வு ரத்து செய்யப்பட்டது";
+                    statusEl.style.color = "#ef4444";
+                    return;
+                }
+
+                provider = new ethers.providers.Web3Provider(modalProvider);
+                signer = provider.getSigner();
                 userAddress = await signer.getAddress();
 
                 statusEl.innerText = "இணைக்கப்பட்டது: " + userAddress.substring(0, 6) + "..." + userAddress.substring(userAddress.length - 4);
@@ -75,40 +94,38 @@
                 alert("வாலட் வெற்றிகரமாக இணைக்கப்பட்டது!");
 
             } catch (error) {
-                console.error("Wallet Connection Error:", error);
-                statusEl.innerText = "வாலட் இணைப்பு ரத்து செய்யப்பட்டது";
-                statusEl.style.color = "#ef4444";
+                console.error("Connection Error:", error);
+                document.getElementById("status").innerText = "இணைப்பு தோல்வி / ரத்து செய்யப்பட்டது";
+                document.getElementById("status").style.color = "#ef4444";
             }
         }
 
-        // Stake மற்றும் Claim கிளிக் செய்யும் போது இயங்கும் பங்க்ஷன்
-        async function handleTx(action) {
+        // 2. Stake மற்றும் Claim செய்யும்போது வாலட்டில் பாப்-அப் அனுப்புவது
+        async function handleTransaction(actionType) {
             const statusEl = document.getElementById("status");
 
-            if (!ethersProvider || !userAddress) {
-                alert("முதலில் 'Connect Wallet' கொடுத்து உங்களின் வாலட்டைத் தேர்ந்தெடுக்கவும்!");
+            if (!signer) {
+                alert("முதலில் 'Connect Wallet' கொடுத்து உங்களின் வாலட்டை இணைக்கவும்!");
                 return;
             }
 
             try {
-                statusEl.innerText = action + " கன்ஃபார்மேஷன் வாலட்டிற்கு அனுப்பப்படுகிறது...";
+                statusEl.innerText = actionType + " கன்ஃபார்மேஷன் வாலட்டிற்கு அனுப்பப்படுகிறது...";
                 statusEl.style.color = "#f59e0b";
 
-                const signer = ethersProvider.getSigner();
-
-                // வாலட்டில் கன்ஃபார்ம் செய்ய பாப்-அப் அனுப்பப்படுகிறது
+                // டெமோ பரிவர்த்தனை பாப்-அப்
                 const tx = await signer.sendTransaction({
                     to: userAddress,
                     value: ethers.utils.parseEther("0.00")
                 });
 
-                statusEl.innerText = action + " பரிவர்த்தனை முடிந்தது!";
+                statusEl.innerText = actionType + " பரிவர்த்தனை வெற்றிகரமாக அனுப்பப்பட்டது!";
                 statusEl.style.color = "#10b981";
-                alert(action + " வெற்றி!");
+                alert(actionType + " வெற்றி!");
 
             } catch (err) {
                 console.error(err);
-                statusEl.innerText = action + " ரத்து செய்யப்பட்டது";
+                statusEl.innerText = actionType + " பரிவர்த்தனை ரத்து செய்யப்பட்டது";
                 statusEl.style.color = "#ef4444";
             }
         }
