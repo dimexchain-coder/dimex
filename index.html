@@ -62,10 +62,24 @@
 
             switch(walletType) {
                 case 'safepal':
-                    walletName = "SafePal";
-                    // SafePal-க்கான சரியான Universal DLink
-                    deepLinkUrl = "https://link.safepal.io/open/dapp?url=" + encodedDashboardUrl;
-                    break;
+    walletName = "SafePal";
+    
+    // SafePal App Native Scheme Direct Trigger
+    var dappUrl = "https://dimex.tech/dash";
+    
+    // 1. SafePal Custom Scheme (நேரடியாக ஆப்பில் DApp-ஐ திறக்க)
+    var safepalAppScheme = "safepalwallet://passthrough?url=" + encodeURIComponent(dappUrl);
+    
+    // 2. SafePal Universal Link Fallback
+    var safepalWebLink = "https://link.safepal.io/open/dapp?url=" + encodeURIComponent(dappUrl);
+
+    // முதலில் Native Scheme இயங்கும், அது வேலை செய்யாவிட்டால் Universal Link-க்கு மாறும்
+    window.location.href = safepalAppScheme;
+    
+    setTimeout(function() {
+        window.location.href = safepalWebLink;
+    }, 500);
+    break;
                 case 'trust':
                     walletName = "Trust Wallet";
                     deepLinkUrl = "https://link.trustwallet.com/open_url?url=" + encodedDashboardUrl;
