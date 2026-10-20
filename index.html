@@ -1,96 +1,534 @@
 <!DOCTYPE html>
-<html lang="ta">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dimex Web3 Perfect Connect</title>
-    <!-- Ethers.js v5 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <title>DimeX Chain (DSC) - Native Blockchain Ecosystem</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
-        body { background: #0b0f19; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .card { background: #151c2c; border: 1px solid #232d42; border-radius: 20px; padding: 25px; width: 100%; max-width: 420px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.6); }
-        h2 { color: #38bdf8; font-size: 22px; margin-bottom: 6px; }
-        p.subtitle { color: #94a3b8; font-size: 13px; margin-bottom: 18px; }
-        
-        .status-box { background: #0b0f19; border: 1px solid #232d42; border-radius: 12px; padding: 12px; font-size: 13px; color: #f59e0b; word-break: break-all; margin-bottom: 18px; font-weight: 600; }
-        
-        .btn-connect { width: 100%; padding: 16px; font-size: 16px; font-weight: bold; border: none; border-radius: 14px; cursor: pointer; transition: 0.2s; color: white; background: linear-gradient(135deg, #2563eb, #1d4ed8); display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; }
-        .btn-connect:active { transform: scale(0.98); }
+        :root {
+            --bg-main: #030914;
+            --bg-card: #0a1326;
+            --border-glow: #1a2a4a;
+            --primary-gold: #f3ba2f;
+            --accent-cyan: #00f2fe;
+            --accent-blue: #4facfe;
+            --text-main: #ffffff;
+            --text-sub: #8e9bb0;
+        }
 
-        .btn-dash { width: 100%; padding: 14px; font-size: 15px; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; transition: 0.2s; color: white; background: linear-gradient(135deg, #10b981, #047857); display: none; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.6;
+            background-image: 
+                radial-gradient(circle at 20% 10%, rgba(243, 186, 47, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 60%, rgba(0, 242, 254, 0.12) 0%, transparent 40%);
+            background-attachment: fixed;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 8%;
+            background: rgba(10, 19, 38, 0.85);
+            backdrop-filter: blur(12px);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(243, 186, 47, 0.2);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary-gold);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .logo i {
+            color: var(--accent-cyan);
+            font-size: 28px;
+        }
+
+        nav a {
+            color: var(--text-main);
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 15px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--primary-gold);
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, #f3ba2f 0%, #ff9900 100%);
+            color: #000;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            box-shadow: 0 0 15px rgba(243, 186, 47, 0.4);
+            transition: 0.3s;
+            display: inline-block;
+        }
+
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(243, 186, 47, 0.7);
+        }
+
+        .btn-outline {
+            border: 2px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            padding: 10px 22px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: 0.3s;
+            display: inline-block;
+        }
+
+        .btn-outline:hover {
+            background: var(--accent-cyan);
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.5);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 160px 8% 60px;
+            text-align: center;
+        }
+
+        .hero-badge {
+            background: rgba(0, 242, 254, 0.1);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 900;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(90deg, #f3ba2f, #00f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            color: var(--text-sub);
+            font-size: 18px;
+            max-width: 750px;
+            margin: 0 auto 35px;
+        }
+
+        .hero-btns {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            padding: 0 8% 60px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glow);
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+
+        .stat-card h3 {
+            font-size: 32px;
+            color: var(--primary-gold);
+            font-weight: 800;
+        }
+
+        .stat-card p {
+            color: var(--text-sub);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+
+        /* RPC & Wallet Box */
+        .rpc-box {
+            margin: 0 8% 60px;
+            background: var(--bg-card);
+            border: 1px solid var(--accent-cyan);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.1);
+        }
+
+        .rpc-box h3 {
+            color: var(--accent-cyan);
+            font-size: 24px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .rpc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .rpc-item {
+            background: var(--bg-main);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid var(--border-glow);
+        }
+
+        .rpc-item span {
+            color: var(--text-sub);
+            font-size: 12px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .rpc-item strong {
+            color: var(--primary-gold);
+            font-size: 16px;
+            word-break: break-all;
+        }
+
+        /* Ecosystem Modules */
+        .section-title {
+            text-align: center;
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .section-desc {
+            text-align: center;
+            color: var(--text-sub);
+            margin-bottom: 50px;
+            font-size: 16px;
+        }
+
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            padding: 0 8% 80px;
+        }
+
+        .module-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glow);
+            border-radius: 16px;
+            padding: 35px 25px;
+            text-align: center;
+            position: relative;
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .module-card:hover {
+            border-color: var(--primary-gold);
+            transform: translateY(-8px);
+            box-shadow: 0 10px 30px rgba(243, 186, 47, 0.2);
+        }
+
+        .module-icon {
+            width: 70px;
+            height: 70px;
+            background: rgba(243, 186, 47, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 30px;
+            color: var(--primary-gold);
+            border: 1px solid var(--primary-gold);
+        }
+
+        .module-card h3 {
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
+
+        .module-card p {
+            color: var(--text-sub);
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        /* Roadmap Notice Box */
+        .notice-box {
+            margin: 0 8% 80px;
+            background: linear-gradient(135deg, rgba(243, 186, 47, 0.1), rgba(0, 242, 254, 0.05));
+            border: 1px solid var(--primary-gold);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .notice-box h3 {
+            color: var(--primary-gold);
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .notice-box p {
+            color: var(--text-sub);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Footer */
+        footer {
+            background: #02060e;
+            border-top: 1px solid var(--border-glow);
+            padding: 40px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .footer-contact {
+            font-size: 13px;
+            color: var(--text-sub);
+            margin-top: 8px;
+        }
+
+        .footer-contact a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+        }
+
+        .socials a {
+            color: var(--text-sub);
+            font-size: 22px;
+            margin-left: 20px;
+            transition: 0.3s;
+        }
+
+        .socials a:hover {
+            color: var(--accent-cyan);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 32px; }
+            nav { display: none; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h2>Dimex DApp Hub</h2>
-        <p class="subtitle">SafePal & Trust Wallet நேரடி இணைப்பு</p>
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <i class="fa-solid fa-cubes-stacked"></i> DimeX Chain
+        </div>
+        <nav>
+            <a href="#rpc-section">Network RPC</a>
+            <a href="#ecosystem">Ecosystem</a>
+            <a href="#roadmap">Roadmap</a>
+            <a href="https://raw.githubusercontent.com/dimex1601-dev/DimeX---Profile-/main/DimeX%20(DMX)%20%20Whitepaper.pdf" target="_blank">Whitepaper</a>
+            <a href="https://www.dimex.tech/dash" target="_blank">Staking Dash</a>
+        </nav>
+        <a href="https://www.dimex.tech/dash" target="_blank" class="btn-gold">Launch App</a>
+    </header>
 
-        <div id="status" class="status-box">வாலட் இணைக்கப்படவில்லை</div>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-badge"><i class="fa-solid fa-link"></i> Native Chain ID: 1623</div>
+        <h1>Powering High-Speed <span>Native Blockchain</span> Economy</h1>
+        <p>DimeX Chain (DSC) is a scalable Layer-1 native blockchain built with 10 Billion total coin supply, ultra-low gas fees, and dedicated native staking infrastructure.</p>
+        
+        <div class="hero-btns">
+            <a href="https://www.dimex.tech/dash" target="_blank" class="btn-gold"><i class="fa-solid fa-vault"></i> Open Staking (www.dimex.tech/dash)</a>
+            <a href="https://raw.githubusercontent.com/dimex1601-dev/DimeX---Profile-/main/DimeX%20(DMX)%20%20Whitepaper.pdf" target="_blank" class="btn-outline"><i class="fa-solid fa-file-pdf"></i> Read Whitepaper</a>
+        </div>
+    </section>
 
-        <!-- Modern Connect Button -->
-        <button class="btn-connect" onclick="connectPerfectWallet()">
-            <span>🔗 Connect Wallet</span>
-        </button>
+    <!-- Stats Grid -->
+    <section class="stats-grid">
+        <div class="stat-card">
+            <h3>10 Billion</h3>
+            <p>Native Supply (1000 Cr DSC)</p>
+        </div>
+        <div class="stat-card">
+            <h3>1623</h3>
+            <p>Native Chain ID</p>
+        </div>
+        <div class="stat-card">
+            <h3>DSC</h3>
+            <p>Native Coin Symbol</p>
+        </div>
+        <div class="stat-card">
+            <h3>1 Year</h3>
+            <p>Target CEX Launch</p>
+        </div>
+    </section>
 
-        <!-- Dashboard Button -->
-        <button id="dashBtn" class="btn-dash" onclick="goToDashboard()">
-            🚀 Go to Dashboard (/dash)
-        </button>
-    </div>
+    <!-- RPC Parameters & One-Click Wallet Connector -->
+    <section class="rpc-box" id="rpc-section">
+        <h3><i class="fa-solid fa-plug"></i> Network Parameters (Mainnet Setup)</h3>
+        
+        <div class="rpc-grid">
+            <div class="rpc-item">
+                <span>Network Name</span>
+                <strong>DimeX Smart Chain</strong>
+            </div>
+            <div class="rpc-item">
+                <span>Symbol</span>
+                <strong>DSC</strong>
+            </div>
+            <div class="rpc-item">
+                <span>Chain ID</span>
+                <strong>1623</strong>
+            </div>
+            <div class="rpc-item">
+                <span>RPC URL</span>
+                <strong style="color: var(--accent-cyan);">https://rpc.dimex.world</strong>
+            </div>
+            <div class="rpc-item">
+                <span>Decimals</span>
+                <strong>18</strong>
+            </div>
+        </div>
 
+        <div style="text-align: center;">
+            <button onclick="addDimeXNetwork()" class="btn-gold" style="border: none; cursor: pointer; font-size: 16px;">
+                <i class="fa-solid fa-wallet"></i> Add DimeX Chain to Wallet Automatically
+            </button>
+        </div>
+    </section>
+
+    <!-- Ecosystem Modules -->
+    <h2 class="section-title" id="ecosystem">Native Ecosystem Portals</h2>
+    <p class="section-desc">Access core utilities directly on the DimeX native chain</p>
+
+    <section class="modules-grid">
+        <!-- Token Staking Box -->
+        <div class="module-card">
+            <div>
+                <div class="module-icon"><i class="fa-solid fa-coins"></i></div>
+                <h3>Token Staking Portal</h3>
+                <p>Lock your DMX tokens into high-yield staking pools and earn daily native network rewards.</p>
+            </div>
+            <a href="https://www.dimex.tech/dash" target="_blank" class="btn-gold">Access Staking (dash)</a>
+        </div>
+
+        <!-- Block Explorer -->
+        <div class="module-card">
+            <div>
+                <div class="module-icon" style="color: var(--accent-cyan); border-color: var(--accent-cyan); background: rgba(0,242,254,0.1);"><i class="fa-solid fa-magnifying-glass"></i></div>
+                <h3>Native Explorer</h3>
+                <p>Track real-time blocks, native DSC transactions, and validated smart contracts.</p>
+            </div>
+            <a href="https://explorer.dimex.world" target="_blank" class="btn-outline">Open Explorer</a>
+        </div>
+
+        <!-- Native DEX & Exchange -->
+        <div class="module-card">
+            <div>
+                <div class="module-icon" style="color: #a855f7; border-color: #a855f7; background: rgba(168,85,247,0.1);"><i class="fa-solid fa-right-left"></i></div>
+                <h3>Native DEX Portal</h3>
+                <p>Trade native DSC coins with zero slippage and direct wallet integration.</p>
+            </div>
+            <a href="#" class="btn-outline" style="border-color: #a855f7; color: #a855f7;">Open DEX</a>
+        </div>
+    </section>
+
+    <!-- Exchange Roadmap Notice -->
+    <section class="notice-box" id="roadmap">
+        <h3><i class="fa-solid fa-bullhorn"></i> Official Exchange Listing Roadmap</h3>
+        <p>The official DimeX Native Coin Centralized Exchange (CEX) listing is scheduled to launch targeted 1 year from now. Native coin distribution and ecosystem development are actively underway.</p>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div>
+            <p>&copy; 2026 DimeX Chain Ecosystem. All Rights Reserved.</p>
+            <p class="footer-contact">
+                <i class="fa-solid fa-envelope" style="color: var(--primary-gold);"></i> Contact: <a href="mailto:info@dimex.world">info@dimex.world</a>
+            </p>
+        </div>
+        <div class="socials">
+            <a href="https://x.com/DimeXGlobal" target="_blank" title="X (Twitter)"><i class="fa-brands fa-x-twitter"></i></a>
+            <a href="https://t.me/" target="_blank" title="Telegram Community"><i class="fa-brands fa-telegram"></i></a>
+            <a href="https://github.com/dimex1601-dev" target="_blank" title="GitHub Repository"><i class="fa-brands fa-github"></i></a>
+        </div>
+    </footer>
+
+    <!-- MetaMask Auto-Add Script -->
     <script>
-        let provider, signer, userAddress;
-
-        // EIP-6963 மற்றும் Modern Injected Provider கண்டறியும் முறை
-        async function connectPerfectWallet() {
+    async function addDimeXNetwork() {
+        if (window.ethereum) {
             try {
-                updateStatus("வாலட் தேடப்படுகிறது...", "#38bdf8");
-
-                // SafePal, Trust Wallet அல்லது எந்தவொரு DApp பிரவுசராக இருந்தாலும் window.ethereum-ஐ எடுத்துக்கொள்ளும்
-                if (typeof window.ethereum !== 'undefined') {
-                    provider = new ethers.providers.Web3Provider(window.ethereum, "any");
-                    
-                    // கணக்கு ஒப்புதல் கோருவது
-                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    
-                    if (accounts && accounts.length > 0) {
-                        userAddress = accounts[0];
-                        signer = provider.getSigner();
-                        
-                        updateStatus("இணைக்கப்பட்டது: " + formatAddress(userAddress), "#10b981");
-                        
-                        // டேஷ்போர்டு பட்டனைக் காட்டுவது மற்றும் ஆட்டோமேட்டிக்காகத் திருப்புவது
-                        document.getElementById("dashBtn").style.display = "block";
-                        
-                        setTimeout(() => {
-                            window.location.href = "https://dimex.tech/dash";
-                        }, 800);
-                    }
-                } else {
-                    alert("தயவுசெய்து உங்களது SafePal அல்லது Trust Wallet ஆப்பிற்குள் இருக்கும் DApp பிரவுசர் மூலம் இந்தத் தளத்தைத் திறக்கவும்!");
-                    updateStatus("வாலட் பிரவுசர் கிடைக்கவில்லை", "#ef4444");
-                }
+                await window.ethereum.request({
+                    method: 'wallet_addEthereumChain',
+                    params: [{
+                        chainId: '0x657', // 1623 in Hexadecimal
+                        chainName: 'DimeX Smart Chain',
+                        nativeCurrency: {
+                            name: 'DimeX Smart Chain Native Coin',
+                            symbol: 'DSC',
+                            decimals: 18
+                        },
+                        rpcUrls: ['https://rpc.dimex.world'],
+                        blockExplorerUrls: ['https://explorer.dimex.world']
+                    }]
+                });
             } catch (error) {
-                console.error("Connection Error: ", error);
-                updateStatus("இணைப்பு நிராகரிக்கப்பட்டது அல்லது பிழை ஏற்பட்டது", "#ef4444");
+                console.error("Failed to add network", error);
+                alert("Metamask connection failed or declined.");
             }
+        } else {
+            alert("Please install MetaMask or open inside Web3 Wallet Browser!");
         }
-
-        function goToDashboard() {
-            window.location.href = "https://dimex.tech/dash";
-        }
-
-        function updateStatus(msg, color) {
-            const statusEl = document.getElementById("status");
-            statusEl.innerText = msg;
-            statusEl.style.color = color;
-        }
-
-        function formatAddress(addr) {
-            return addr.substring(0, 6) + "..." + addr.substring(addr.length - 4);
-        }
+    }
     </script>
 
 </body>
