@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dimex Web3 Connect (WalletConnect v2)</title>
-    <!-- Ethers.js -->
+    <title>Dimex Web3 Perfect Connect</title>
+    <!-- Ethers.js v5 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
-    <!-- WalletConnect v2 Provider CDN -->
-    <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
         body { background: #0b0f19; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
@@ -17,26 +15,26 @@
         
         .status-box { background: #0b0f19; border: 1px solid #232d42; border-radius: 12px; padding: 12px; font-size: 13px; color: #f59e0b; word-break: break-all; margin-bottom: 18px; font-weight: 600; }
         
-        .btn-connect { width: 100%; padding: 16px; font-size: 16px; font-weight: bold; border: none; border-radius: 14px; cursor: pointer; transition: 0.2s; color: white; background: linear-gradient(135deg, #00d563, #047857); display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; }
+        .btn-connect { width: 100%; padding: 16px; font-size: 16px; font-weight: bold; border: none; border-radius: 14px; cursor: pointer; transition: 0.2s; color: white; background: linear-gradient(135deg, #2563eb, #1d4ed8); display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; }
         .btn-connect:active { transform: scale(0.98); }
 
-        .btn-dash { width: 100%; padding: 14px; font-size: 15px; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; transition: 0.2s; color: white; background: linear-gradient(135deg, #2563eb, #1d4ed8); display: none; }
+        .btn-dash { width: 100%; padding: 14px; font-size: 15px; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; transition: 0.2s; color: white; background: linear-gradient(135deg, #10b981, #047857); display: none; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h2>Dimex DApp Portal</h2>
-        <p class="subtitle">PancakeSwap மாடல் நேரடி வாலட் இணைப்பு</p>
+        <h2>Dimex DApp Hub</h2>
+        <p class="subtitle">SafePal & Trust Wallet நேரடி இணைப்பு</p>
 
         <div id="status" class="status-box">வாலட் இணைக்கப்படவில்லை</div>
 
-        <!-- WalletConnect Trigger Button -->
-        <button class="btn-connect" onclick="connectWithWalletConnect()">
-            <span>🛡️ Connect SafePal / WalletConnect</span>
+        <!-- Modern Connect Button -->
+        <button class="btn-connect" onclick="connectPerfectWallet()">
+            <span>🔗 Connect Wallet</span>
         </button>
 
-        <!-- Go to Dashboard -->
+        <!-- Dashboard Button -->
         <button id="dashBtn" class="btn-dash" onclick="goToDashboard()">
             🚀 Go to Dashboard (/dash)
         </button>
@@ -45,38 +43,38 @@
     <script>
         let provider, signer, userAddress;
 
-        async function connectWithWalletConnect() {
+        // EIP-6963 மற்றும் Modern Injected Provider கண்டறியும் முறை
+        async function connectPerfectWallet() {
             try {
-                updateStatus("WalletConnect பிரவுசர் திறக்கப்படுகிறது...", "#38bdf8");
+                updateStatus("வாலட் தேடப்படுகிறது...", "#38bdf8");
 
-                // WalletConnect Provider இன்ஸ்டன்ட் உருவாக்கம் (PancakeSwap முறை)
-                const wcProvider = new WalletConnectProvider.default({
-                    infuraId: "27e484dcd9e3efcfd25a83a787363158", // பொதுவான பப்ளிக் இன்ஃபுரா ஐடி
-                    qrcode: true, // கியூஆர் கோடு அல்லது டைரக்ட் ஆப் ஓபன் ஆகும்
-                    rpc: {
-                        56: "https://bsc-dataseed.binance.org/" // Binance Smart Chain (BNB Chain)
+                // SafePal, Trust Wallet அல்லது எந்தவொரு DApp பிரவுசராக இருந்தாலும் window.ethereum-ஐ எடுத்துக்கொள்ளும்
+                if (typeof window.ethereum !== 'undefined') {
+                    provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+                    
+                    // கணக்கு ஒப்புதல் கோருவது
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    
+                    if (accounts && accounts.length > 0) {
+                        userAddress = accounts[0];
+                        signer = provider.getSigner();
+                        
+                        updateStatus("இணைக்கப்பட்டது: " + formatAddress(userAddress), "#10b981");
+                        
+                        // டேஷ்போர்டு பட்டனைக் காட்டுவது மற்றும் ஆட்டோமேட்டிக்காகத் திருப்புவது
+                        document.getElementById("dashBtn").style.display = "block";
+                        
+                        setTimeout(() => {
+                            window.location.href = "https://dimex.tech/dash";
+                        }, 800);
                     }
-                });
-
-                // வாலட் இணைக்க ஒப்புதல் கோருவது
-                await wcProvider.enable();
-
-                provider = new ethers.providers.Web3Provider(wcProvider);
-                signer = provider.getSigner();
-                userAddress = await signer.getAddress();
-
-                updateStatus("இணைக்கப்பட்டது: " + formatAddress(userAddress), "#10b981");
-                
-                // டேஷ்போர்டு பட்டனை காட்டுவதுடன் ஆட்டோமேட்டிக்காக /dash பக்கத்திற்கு திருப்புவது
-                document.getElementById("dashBtn").style.display = "block";
-                
-                setTimeout(() => {
-                    window.location.href = "https://dimex.tech/dash";
-                }, 1000);
-
+                } else {
+                    alert("தயவுசெய்து உங்களது SafePal அல்லது Trust Wallet ஆப்பிற்குள் இருக்கும் DApp பிரவுசர் மூலம் இந்தத் தளத்தைத் திறக்கவும்!");
+                    updateStatus("வாலட் பிரவுசர் கிடைக்கவில்லை", "#ef4444");
+                }
             } catch (error) {
-                console.error("Connection error: ", error);
-                updateStatus("இணைப்பு ரத்து செய்யப்பட்டது அல்லது பிழை", "#ef4444");
+                console.error("Connection Error: ", error);
+                updateStatus("இணைப்பு நிராகரிக்கப்பட்டது அல்லது பிழை ஏற்பட்டது", "#ef4444");
             }
         }
 
