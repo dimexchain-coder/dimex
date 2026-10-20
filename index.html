@@ -3,13 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Web3 Universal Connect</title>
+    <title>Dimex Web3 Direct Connect</title>
     <!-- Ethers.js CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
-    <!-- Web3Modal CDN (WalletConnect integration) -->
-    <script src="https://unpkg.com/web3modal@1.9.12/dist/index.js"></script>
-    <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
-
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
         body { background: #0b0f19; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
@@ -28,87 +24,61 @@
 <body>
 
     <div class="card">
-        <h2>Dimex DApp Connect</h2>
-        <p class="subtitle">SafePal, Trust Wallet & அனைத்து வாலட்டுகளையும் இணைக்கவும்</p>
+        <h2>Dimex DApp Portal</h2>
+        <p class="subtitle">SafePal & Trust Wallet நேரடி இணைப்பு</p>
 
         <div id="status" class="status-box">வாலட் இணைக்கப்படவில்லை</div>
 
-        <!-- Universal Connect Button -->
-        <button class="btn-connect" onclick="onConnect()">
-            <span>🛡️ Connect Wallet (All Wallets)</span>
+        <!-- Direct Injected Connect Button -->
+        <button class="btn-connect" onclick="connectWallet()">
+            <span>🔗 Connect Wallet (In-App)</span>
         </button>
 
-        <!-- Go to Dashboard Button (Appears after connection) -->
+        <!-- Go to Dashboard Button -->
         <button id="dashBtn" class="btn-dash" onclick="goToDashboard()">
             🚀 Go to Dashboard (/dash)
         </button>
     </div>
 
     <script>
-        // Web3Modal Setup
-        const Web3Modal = window.Web3Modal.default;
-        const WalletConnectProvider = window.WalletConnectProvider.default;
-
-        let web3Modal;
         let provider, signer, userAddress;
 
-        // Initialize Web3Modal with WalletConnect & Injected Providers
-        function initWeb3Modal() {
-            const providerOptions = {
-                walletconnect: {
-                    package: WalletConnectProvider,
-                    options: {
-                        // உங்கள் DApp-க்கான RPC அல்லது இன்ஃபுரா (Infura / Alchemy) ஐடி கொடுக்கலாம் (அல்லது பொதுவானது)
-                        infuraId: "27e484dcd9e3efcfd25a83a787363158" 
-                    }
-                }
-            };
+        async function connectWallet() {
+            // SafePal, Trust Wallet மற்றும் பிற DApp பிரவுசர்களில் உள்ள window.ethereum-ஐ நேரடியாகக் கண்டறியும்
+            if (typeof window.ethereum !== 'undefined' || (typeof window.web3 !== 'undefined')) {
+                try {
+                    updateStatus("வாலட் ஒப்புதல் கேட்கப்படுகிறது...", "#38bdf8");
 
-            web3Modal = new Web3Modal({
-                cacheProvider: false,
-                providerOptions,
-                theme: "dark"
-            });
-        }
+                    // Modern EthersProvider injection
+                    const ethProvider = window.ethereum || window.web3.currentProvider;
+                    provider = new ethers.providers.Web3Provider(ethProvider, "any");
 
-        window.addEventListener('load', () => {
-            initWeb3Modal();
-        });
-
-        // Connect Function
-        async function onConnect() {
-            try {
-                updateStatus("வாலட் தேடப்படுகிறது...", "#38bdf8");
-                
-                // Open Web3Modal selection popup (SafePal, Trust, MetaMask etc.)
-                const instance = await web3Modal.connect();
-
-                provider = new ethers.providers.Web3Provider(instance);
-                signer = provider.getSigner();
-                userAddress = await signer.getAddress();
-
-                updateStatus("இணைக்கப்பட்டது: " + formatAddress(userAddress), "#10b981");
-                
-                // Show Dashboard Button
-                document.getElementById("dashBtn").style.display = "block";
-
-                // Listen for account changes
-                instance.on("accountsChanged", (accounts) => {
-                    if (accounts.length > 0) {
+                    // Request accounts directly
+                    const accounts = await ethProvider.request({ method: 'eth_requestAccounts' });
+                    
+                    if (accounts && accounts.length > 0) {
                         userAddress = accounts[0];
+                        signer = provider.getSigner();
+                        
                         updateStatus("இணைக்கப்பட்டது: " + formatAddress(userAddress), "#10b981");
-                    } else {
-                        onDisconnect();
+                        
+                        // Show Dashboard Button & Automatically Redirect after 1 second
+                        document.getElementById("dashBtn").style.display = "block";
+                        
+                        setTimeout(() => {
+                            window.location.href = "https://dimex.tech/dash";
+                        }, 1000);
                     }
-                });
-
-            } catch(e) {
-                console.error("Connection error: ", e);
-                updateStatus("இணைப்பு ரத்து செய்யப்பட்டது", "#ef4444");
+                } catch (error) {
+                    console.error("Connection rejected: ", error);
+                    updateStatus("இணைப்பு நிராகரிக்கப்பட்டது அல்லது பிழை ஏற்பட்டது", "#ef4444");
+                }
+            } else {
+                alert("தயவுசெய்து SafePal அல்லது Trust Wallet ஆப்பிற்குள் இருக்கும் DApp பிரவுசர் மூலம் இந்தத் தளத்தைத் திறக்கவும்!");
+                updateStatus("வாலட் பிரவுசர் கண்டறியப்படவில்லை", "#ef4444");
             }
         }
 
-        // Navigate to Dashboard
         function goToDashboard() {
             window.location.href = "https://dimex.tech/dash";
         }
