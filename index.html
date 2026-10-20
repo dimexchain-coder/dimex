@@ -3,9 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SafePal & Web3 Connection Hub</title>
+    <title>Secure Web3 Universal Connect</title>
     <!-- Ethers.js CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <!-- Web3Modal CDN (WalletConnect integration) -->
+    <script src="https://unpkg.com/web3modal@1.9.12/dist/index.js"></script>
+    <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
+
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
         body { background: #0b0f19; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
@@ -15,116 +19,98 @@
         
         .status-box { background: #0b0f19; border: 1px solid #232d42; border-radius: 12px; padding: 12px; font-size: 13px; color: #f59e0b; word-break: break-all; margin-bottom: 18px; font-weight: 600; }
         
-        .section-title { text-align: left; font-size: 13px; color: #64748b; margin: 12px 0 8px 4px; font-weight: 600; text-transform: uppercase; }
-        
-        .wallet-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 20px; }
-        .btn-wallet { padding: 15px; font-size: 15px; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; transition: all 0.2s; color: white; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn-wallet:active { transform: scale(0.96); }
+        .btn-connect { width: 100%; padding: 16px; font-size: 16px; font-weight: bold; border: none; border-radius: 14px; cursor: pointer; transition: 0.2s; color: white; background: linear-gradient(135deg, #2563eb, #1d4ed8); display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; }
+        .btn-connect:active { transform: scale(0.98); }
 
-        /* Main Wallets */
-        .w-safepal { background: #00d563; color: #000; font-size: 16px; }
-        .w-trust { background: #3375bb; }
-        .w-tokenpocket { background: #29b6f6; color: #000; }
-        .w-meta { background: #e4761b; }
-
-        .action-box { border-top: 1px solid #232d42; padding-top: 15px; margin-top: 10px; }
-        .btn-action { width: 100%; padding: 14px; font-size: 15px; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; transition: 0.2s; color: white; background: linear-gradient(135deg, #2563eb, #1d4ed8); }
-        .btn-action:active { transform: scale(0.98); }
+        .btn-dash { width: 100%; padding: 14px; font-size: 15px; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; transition: 0.2s; color: white; background: linear-gradient(135deg, #10b981, #047857); display: none; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h2>SafePal & DApp Connect</h2>
-        .p.subtitle உங்களது SafePal மற்றும் வாலட்டுகளை இணைக்கவும்</p>
+        <h2>Dimex DApp Connect</h2>
+        <p class="subtitle">SafePal, Trust Wallet & அனைத்து வாலட்டுகளையும் இணைக்கவும்</p>
 
-        <div id="status" class="status-box">வாலட் தேர்ந்தெடுக்கப்படவில்லை</div>
+        <div id="status" class="status-box">வாலட் இணைக்கப்படவில்லை</div>
 
-        <div class="section-title">Primary Wallets (SafePal Focus)</div>
-        <div class="wallet-grid">
-            <!-- SafePal Main Button -->
-            <button class="btn-wallet w-safepal" onclick="openWalletApp('safepal')">🛡️ Open in SafePal Wallet</button>
-            <button class="btn-wallet w-trust" onclick="openWalletApp('trust')">🔵 Trust Wallet</button>
-            <button class="btn-wallet w-tokenpocket" onclick="openWalletApp('tokenpocket')">🟢 TokenPocket</button>
-            <button class="btn-wallet w-meta" onclick="openWalletApp('metamask')">🦊 MetaMask</button>
-        </div>
+        <!-- Universal Connect Button -->
+        <button class="btn-connect" onclick="onConnect()">
+            <span>🛡️ Connect Wallet (All Wallets)</span>
+        </button>
 
-        <div class="action-box">
-            <button class="btn-action" onclick="connectInAppWallet()">🔗 Connect Wallet (In-App)</button>
-        </div>
+        <!-- Go to Dashboard Button (Appears after connection) -->
+        <button id="dashBtn" class="btn-dash" onclick="goToDashboard()">
+            🚀 Go to Dashboard (/dash)
+        </button>
     </div>
 
     <script>
-        // டேஷ்போர்டு நேரடி லிங்க்
-        const targetDashboardUrl = "https://dimex.tech/dash";
-        const encodedDashboardUrl = encodeURIComponent(targetDashboardUrl);
+        // Web3Modal Setup
+        const Web3Modal = window.Web3Modal.default;
+        const WalletConnectProvider = window.WalletConnectProvider.default;
 
+        let web3Modal;
         let provider, signer, userAddress;
 
-        // DApp பிரவுசருக்குள் ஏற்கனவே திறக்கப்பட்டிருந்தால் ஆட்டோ-கனெக்ட் செய்யும்
-        window.addEventListener('load', async () => {
-            if (window.ethereum) {
-                try {
-                    provider = new ethers.providers.Web3Provider(window.ethereum, "any");
-                    const accounts = await provider.listAccounts();
-                    if (accounts.length > 0) {
-                        userAddress = accounts[0];
-                        signer = provider.getSigner();
-                        updateStatus("இணைக்கப்பட்டது: " + formatAddress(userAddress), "#10b981");
-                    } else {
-                        updateStatus("DApp பிரவுசர் தயார். 'Connect Wallet' அழுத்தவும்.", "#38bdf8");
+        // Initialize Web3Modal with WalletConnect & Injected Providers
+        function initWeb3Modal() {
+            const providerOptions = {
+                walletconnect: {
+                    package: WalletConnectProvider,
+                    options: {
+                        // உங்கள் DApp-க்கான RPC அல்லது இன்ஃபுரா (Infura / Alchemy) ஐடி கொடுக்கலாம் (அல்லது பொதுவானது)
+                        infuraId: "27e484dcd9e3efcfd25a83a787363158" 
                     }
-                } catch (e) {
-                    console.error(e);
                 }
-            }
-        });
+            };
 
-        // வாலட் ஆப் மற்றும் பிரவுசரை ஓபன் செய்யும் பங்க்ஷன்
-        function openWalletApp(wallet) {
-            let deepLink = "";
-
-            switch(wallet) {
-                case 'safepal':
-                    // SafePal-க்கு பிரத்யேகமான Universal DApp link மற்றும் Scheme இரண்டும் வேலை செய்யும் வடிவம்
-                    deepLink = "https://link.safepal.io/open/dapp?url=" + encodedDashboardUrl;
-                    break;
-                case 'trust':
-                    deepLink = "https://link.trustwallet.com/open_url?url=" + encodedDashboardUrl;
-                    break;
-                case 'tokenpocket':
-                    deepLink = "tpoutside://openDapp?url=" + encodedDashboardUrl;
-                    break;
-                case 'metamask':
-                    deepLink = "https://metamask.app.link/dapp/dimex.tech/dash";
-                    break;
-            }
-
-            updateStatus("வாலட் ஆப் திறக்கப்படுகிறது...", "#38bdf8");
-            
-            setTimeout(() => {
-                window.location.href = deepLink;
-            }, 300);
+            web3Modal = new Web3Modal({
+                cacheProvider: false,
+                providerOptions,
+                theme: "dark"
+            });
         }
 
-        // வாலட் ஆப்பிற்குள் வந்ததும் இணைக்கும் பங்க்ஷன்
-        async function connectInAppWallet() {
-            if (window.ethereum) {
-                try {
-                    provider = new ethers.providers.Web3Provider(window.ethereum, "any");
-                    const accounts = await provider.send("eth_requestAccounts", []);
-                    userAddress = accounts[0];
-                    signer = provider.getSigner();
-                    
-                    updateStatus("இணைக்கப்பட்டது: " + formatAddress(userAddress), "#10b981");
-                    alert("வாலட் வெற்றிகரமாக இணைக்கப்பட்டது!");
-                } catch (err) {
-                    console.error(err);
-                    updateStatus("இணைப்பு நிராகரிக்கப்பட்டது", "#ef4444");
-                }
-            } else {
-                alert("முதலில் மேலே உள்ள SafePal பட்டனை அழுத்தி வாலட் ஆப்பிற்குள் செல்லவும்!");
+        window.addEventListener('load', () => {
+            initWeb3Modal();
+        });
+
+        // Connect Function
+        async function onConnect() {
+            try {
+                updateStatus("வாலட் தேடப்படுகிறது...", "#38bdf8");
+                
+                // Open Web3Modal selection popup (SafePal, Trust, MetaMask etc.)
+                const instance = await web3Modal.connect();
+
+                provider = new ethers.providers.Web3Provider(instance);
+                signer = provider.getSigner();
+                userAddress = await signer.getAddress();
+
+                updateStatus("இணைக்கப்பட்டது: " + formatAddress(userAddress), "#10b981");
+                
+                // Show Dashboard Button
+                document.getElementById("dashBtn").style.display = "block";
+
+                // Listen for account changes
+                instance.on("accountsChanged", (accounts) => {
+                    if (accounts.length > 0) {
+                        userAddress = accounts[0];
+                        updateStatus("இணைக்கப்பட்டது: " + formatAddress(userAddress), "#10b981");
+                    } else {
+                        onDisconnect();
+                    }
+                });
+
+            } catch(e) {
+                console.error("Connection error: ", e);
+                updateStatus("இணைப்பு ரத்து செய்யப்பட்டது", "#ef4444");
             }
+        }
+
+        // Navigate to Dashboard
+        function goToDashboard() {
+            window.location.href = "https://dimex.tech/dash";
         }
 
         function updateStatus(msg, color) {
