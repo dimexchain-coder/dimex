@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Web3 Multi-Wallet Hub</title>
+    <title>SafePal & Web3 Connection Hub</title>
     <!-- Ethers.js CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
         body { background: #0b0f19; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .card { background: #151c2c; border: 1px solid #232d42; border-radius: 20px; padding: 25px; width: 100%; max-width: 440px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.6); }
+        .card { background: #151c2c; border: 1px solid #232d42; border-radius: 20px; padding: 25px; width: 100%; max-width: 420px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.6); }
         h2 { color: #38bdf8; font-size: 22px; margin-bottom: 6px; }
         p.subtitle { color: #94a3b8; font-size: 13px; margin-bottom: 18px; }
         
@@ -17,19 +17,15 @@
         
         .section-title { text-align: left; font-size: 13px; color: #64748b; margin: 12px 0 8px 4px; font-weight: 600; text-transform: uppercase; }
         
-        .wallet-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .btn-wallet { padding: 12px 10px; font-size: 13px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s; color: white; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .wallet-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 20px; }
+        .btn-wallet { padding: 15px; font-size: 15px; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; transition: all 0.2s; color: white; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-wallet:active { transform: scale(0.96); }
 
-        /* Wallet Colors */
+        /* Main Wallets */
+        .w-safepal { background: #00d563; color: #000; font-size: 16px; }
         .w-trust { background: #3375bb; }
+        .w-tokenpocket { background: #29b6f6; color: #000; }
         .w-meta { background: #e4761b; }
-        .w-safepal { background: #00d563; color: #000; }
-        .w-tokenpocket { background: #29b6f6; }
-        .w-bitget { background: #00f0ff; color: #000; }
-        .w-okx { background: #121212; border: 1px solid #333; color: #fff; }
-        .w-phantom { background: #ab9ff2; color: #000; }
-        .w-rainbow { background: #001e59; border: 1px solid #38bdf8; }
 
         .action-box { border-top: 1px solid #232d42; padding-top: 15px; margin-top: 10px; }
         .btn-action { width: 100%; padding: 14px; font-size: 15px; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; transition: 0.2s; color: white; background: linear-gradient(135deg, #2563eb, #1d4ed8); }
@@ -39,21 +35,18 @@
 <body>
 
     <div class="card">
-        <h2>Web3 Dashboard Connect</h2>
-        <p class="subtitle">உங்களது வாலட்டைத் தேர்ந்தெடுத்து DApp பிரவுசரில் திறக்கவும்</p>
+        <h2>SafePal & DApp Connect</h2>
+        .p.subtitle உங்களது SafePal மற்றும் வாலட்டுகளை இணைக்கவும்</p>
 
         <div id="status" class="status-box">வாலட் தேர்ந்தெடுக்கப்படவில்லை</div>
 
-        <div class="section-title">Select Wallet App</div>
+        <div class="section-title">Primary Wallets (SafePal Focus)</div>
         <div class="wallet-grid">
+            <!-- SafePal Main Button -->
+            <button class="btn-wallet w-safepal" onclick="openWalletApp('safepal')">🛡️ Open in SafePal Wallet</button>
             <button class="btn-wallet w-trust" onclick="openWalletApp('trust')">🔵 Trust Wallet</button>
-            <button class="btn-wallet w-meta" onclick="openWalletApp('metamask')">🦊 MetaMask</button>
-            <button class="btn-wallet w-safepal" onclick="openWalletApp('safepal')">🛡️ SafePal</button>
             <button class="btn-wallet w-tokenpocket" onclick="openWalletApp('tokenpocket')">🟢 TokenPocket</button>
-            <button class="btn-wallet w-bitget" onclick="openWalletApp('bitget')">🩵 Bitget Wallet</button>
-            <button class="btn-wallet w-okx" onclick="openWalletApp('okx')">⬛ OKX Wallet</button>
-            <button class="btn-wallet w-phantom" onclick="openWalletApp('phantom')">👻 Phantom</button>
-            <button class="btn-wallet w-rainbow" onclick="openWalletApp('rainbow')">🌈 Rainbow</button>
+            <button class="btn-wallet w-meta" onclick="openWalletApp('metamask')">🦊 MetaMask</button>
         </div>
 
         <div class="action-box">
@@ -62,14 +55,13 @@
     </div>
 
     <script>
-        // Target Dashboard URL Configuration
+        // டேஷ்போர்டு நேரடி லிங்க்
         const targetDashboardUrl = "https://dimex.tech/dash";
         const encodedDashboardUrl = encodeURIComponent(targetDashboardUrl);
-        const hostAndPath = "dimex.tech/dash";
 
         let provider, signer, userAddress;
 
-        // 1. DApp பிரவுசருக்குள் ஏற்கனவே திறக்கப்பட்டிருந்தால் ஆட்டோ-கனெக்ட் செய்யும்
+        // DApp பிரவுசருக்குள் ஏற்கனவே திறக்கப்பட்டிருந்தால் ஆட்டோ-கனெக்ட் செய்யும்
         window.addEventListener('load', async () => {
             if (window.ethereum) {
                 try {
@@ -88,42 +80,23 @@
             }
         });
 
-        // 2. வெளியிலிருந்து 8 முக்கிய வாலட் ஆப்களைத் திறந்து நேராக டேஷ்போர்டிற்குச் செல்லும் பங்க்ஷன்
+        // வாலட் ஆப் மற்றும் பிரவுசரை ஓபன் செய்யும் பங்க்ஷன்
         function openWalletApp(wallet) {
             let deepLink = "";
 
             switch(wallet) {
-                case 'trust':
-                    // Trust Wallet
-                    deepLink = "https://link.trustwallet.com/open_url?url=" + encodedDashboardUrl;
-                    break;
-                case 'metamask':
-                    // MetaMask
-                    deepLink = "https://metamask.app.link/dapp/" + hostAndPath;
-                    break;
                 case 'safepal':
-                    // SafePal
+                    // SafePal-க்கு பிரத்யேகமான Universal DApp link மற்றும் Scheme இரண்டும் வேலை செய்யும் வடிவம்
                     deepLink = "https://link.safepal.io/open/dapp?url=" + encodedDashboardUrl;
                     break;
+                case 'trust':
+                    deepLink = "https://link.trustwallet.com/open_url?url=" + encodedDashboardUrl;
+                    break;
                 case 'tokenpocket':
-                    // TokenPocket
                     deepLink = "tpoutside://openDapp?url=" + encodedDashboardUrl;
                     break;
-                case 'bitget':
-                    // Bitget Wallet
-                    deepLink = "https://bkcode.vip?action=dapp&url=" + encodedDashboardUrl;
-                    break;
-                case 'okx':
-                    // OKX Wallet
-                    deepLink = "okx://wallet/dapp/details?dappUrl=" + encodedDashboardUrl;
-                    break;
-                case 'phantom':
-                    // Phantom Wallet
-                    deepLink = "https://phantom.app/ul/browse/" + encodedDashboardUrl;
-                    break;
-                case 'rainbow':
-                    // Rainbow Wallet
-                    deepLink = "https://rainbow.me/open/dapp?url=" + encodedDashboardUrl;
+                case 'metamask':
+                    deepLink = "https://metamask.app.link/dapp/dimex.tech/dash";
                     break;
             }
 
@@ -134,7 +107,7 @@
             }, 300);
         }
 
-        // 3. வாலட் ஆப்பிற்குள் வந்ததும் இணைக்கும் பங்க்ஷன்
+        // வாலட் ஆப்பிற்குள் வந்ததும் இணைக்கும் பங்க்ஷன்
         async function connectInAppWallet() {
             if (window.ethereum) {
                 try {
@@ -150,7 +123,7 @@
                     updateStatus("இணைப்பு நிராகரிக்கப்பட்டது", "#ef4444");
                 }
             } else {
-                alert("மேலே உள்ள பட்டியலில் இருந்து உங்களது வாலட் ஆப்பைத் தேர்ந்தெடுத்துத் திறக்கவும்!");
+                alert("முதலில் மேலே உள்ள SafePal பட்டனை அழுத்தி வாலட் ஆப்பிற்குள் செல்லவும்!");
             }
         }
 
