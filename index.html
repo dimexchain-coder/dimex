@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Wallet Web3 Staking</title>
+    <title>Secure Web3 Multi-Wallet Hub</title>
     <!-- Ethers.js CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
         body { background: #0b0f19; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .card { background: #151c2c; border: 1px solid #232d42; border-radius: 20px; padding: 25px; width: 100%; max-width: 420px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.6); }
+        .card { background: #151c2c; border: 1px solid #232d42; border-radius: 20px; padding: 25px; width: 100%; max-width: 440px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.6); }
         h2 { color: #38bdf8; font-size: 22px; margin-bottom: 6px; }
         p.subtitle { color: #94a3b8; font-size: 13px; margin-bottom: 18px; }
         
@@ -27,23 +27,20 @@
         .w-safepal { background: #00d563; color: #000; }
         .w-tokenpocket { background: #29b6f6; }
         .w-bitget { background: #00f0ff; color: #000; }
-        .w-okx { background: #ffffff; color: #000; }
+        .w-okx { background: #121212; border: 1px solid #333; color: #fff; }
         .w-phantom { background: #ab9ff2; color: #000; }
         .w-rainbow { background: #001e59; border: 1px solid #38bdf8; }
 
-        .action-box { border-top: 1px solid #232d42; pt: 15px; margin-top: 10px; }
-        .btn-action { width: 100%; padding: 14px; margin: 6px 0; font-size: 15px; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; transition: 0.2s; color: white; }
-        .btn-connect { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
-        .btn-stake { background: linear-gradient(135deg, #10b981, #047857); }
-        .btn-claim { background: linear-gradient(135deg, #f59e0b, #b45309); }
+        .action-box { border-top: 1px solid #232d42; padding-top: 15px; margin-top: 10px; }
+        .btn-action { width: 100%; padding: 14px; font-size: 15px; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; transition: 0.2s; color: white; background: linear-gradient(135deg, #2563eb, #1d4ed8); }
         .btn-action:active { transform: scale(0.98); }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h2>Web3 Staking Hub</h2>
-        <p class="subtitle">உங்கள் வாலட்டைத் தேர்ந்தெடுத்து DApp-ஐ திறக்கவும்</p>
+        <h2>Web3 Dashboard Connect</h2>
+        <p class="subtitle">உங்களது வாலட்டைத் தேர்ந்தெடுத்து DApp பிரவுசரில் திறக்கவும்</p>
 
         <div id="status" class="status-box">வாலட் தேர்ந்தெடுக்கப்படவில்லை</div>
 
@@ -60,16 +57,15 @@
         </div>
 
         <div class="action-box">
-            <button class="btn-action btn-connect" onclick="connectInAppWallet()">🔗 Connect Wallet (In-App)</button>
-            <button class="btn-action btn-stake" onclick="handleTx('Stake')">⚡ Stake Demo</button>
-            <button class="btn-action btn-claim" onclick="handleTx('Claim')">🎁 Claim Reward</button>
+            <button class="btn-action" onclick="connectInAppWallet()">🔗 Connect Wallet (In-App)</button>
         </div>
     </div>
 
     <script>
-        const currentUrl = window.location.href;
-        const encodedUrl = encodeURIComponent(currentUrl);
-        const hostAndPath = window.location.host + window.location.pathname;
+        // Target Dashboard URL Configuration
+        const targetDashboardUrl = "https://dimex.tech/dash";
+        const encodedDashboardUrl = encodeURIComponent(targetDashboardUrl);
+        const hostAndPath = "dimex.tech/dash";
 
         let provider, signer, userAddress;
 
@@ -92,35 +88,42 @@
             }
         });
 
-        // 2. வெளி பிரவுசரில் இருந்து குறிப்பிட்ட வாலட் ஆப்பைத் திறக்கும் பங்க்ஷன்
+        // 2. வெளியிலிருந்து 8 முக்கிய வாலட் ஆப்களைத் திறந்து நேராக டேஷ்போர்டிற்குச் செல்லும் பங்க்ஷன்
         function openWalletApp(wallet) {
-            const statusEl = document.getElementById("status");
             let deepLink = "";
 
             switch(wallet) {
                 case 'trust':
-                    deepLink = "https://link.trustwallet.com/open_url?url=" + encodedUrl;
+                    // Trust Wallet
+                    deepLink = "https://link.trustwallet.com/open_url?url=" + encodedDashboardUrl;
                     break;
                 case 'metamask':
+                    // MetaMask
                     deepLink = "https://metamask.app.link/dapp/" + hostAndPath;
                     break;
                 case 'safepal':
-                    deepLink = "safepalwallet://sfp/dapp?url=" + encodedUrl;
+                    // SafePal
+                    deepLink = "https://link.safepal.io/open/dapp?url=" + encodedDashboardUrl;
                     break;
                 case 'tokenpocket':
-                    deepLink = "tpoutside://openDapp?url=" + encodedUrl;
+                    // TokenPocket
+                    deepLink = "tpoutside://openDapp?url=" + encodedDashboardUrl;
                     break;
                 case 'bitget':
-                    deepLink = "https://bkcode.vip?action=dapp&url=" + encodedUrl;
+                    // Bitget Wallet
+                    deepLink = "https://bkcode.vip?action=dapp&url=" + encodedDashboardUrl;
                     break;
                 case 'okx':
-                    deepLink = "okx://wallet/dapp/details?dappUrl=" + encodedUrl;
+                    // OKX Wallet
+                    deepLink = "okx://wallet/dapp/details?dappUrl=" + encodedDashboardUrl;
                     break;
                 case 'phantom':
-                    deepLink = "https://phantom.app/ul/browse/" + encodedUrl;
+                    // Phantom Wallet
+                    deepLink = "https://phantom.app/ul/browse/" + encodedDashboardUrl;
                     break;
                 case 'rainbow':
-                    deepLink = "https://rainbow.me/open/dapp?url=" + encodedUrl;
+                    // Rainbow Wallet
+                    deepLink = "https://rainbow.me/open/dapp?url=" + encodedDashboardUrl;
                     break;
             }
 
@@ -148,29 +151,6 @@
                 }
             } else {
                 alert("மேலே உள்ள பட்டியலில் இருந்து உங்களது வாலட் ஆப்பைத் தேர்ந்தெடுத்துத் திறக்கவும்!");
-            }
-        }
-
-        // 4. Stake / Claim ட்ரான்சாக்ஷன் பாப்-அப்
-        async function handleTx(action) {
-            if (!signer) {
-                alert("முதலில் உங்களது வாலட் ஆப்பிற்குள் சென்று 'Connect Wallet' செய்யவும்!");
-                return;
-            }
-
-            try {
-                updateStatus(action + " கன்ஃபார்மேஷன் வாலட்டிற்கு அனுப்பப்படுகிறது...", "#f59e0b");
-
-                const tx = await signer.sendTransaction({
-                    to: userAddress,
-                    value: ethers.utils.parseEther("0.00")
-                });
-
-                updateStatus(action + " வெற்றிகரமாக முடிந்தது!", "#10b981");
-                alert(action + " வெற்றி!");
-            } catch (err) {
-                console.error(err);
-                updateStatus(action + " ரத்து செய்யப்பட்டது", "#ef4444");
             }
         }
 
