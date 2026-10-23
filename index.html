@@ -383,7 +383,7 @@
     <section class="hero">
         <div class="hero-badge"><i class="fa-solid fa-link"></i> Native Chain ID: 1623</div>
         <h1>Powering High-Speed <span>Native Blockchain</span> Economy</h1>
-        <p>DimeX Chain (DSC) is a scalable Layer-1 native blockchain built with 10 Billion total coin supply, ultra-low gas fees, and dedicated native staking infrastructure.</p>
+        <p>DimeX Chain (DMXC) is a scalable Layer-1 native blockchain built with 10 Billion total coin supply, ultra-low gas fees, and dedicated native staking infrastructure.</p>
         
         <div class="hero-btns">
             <a href="https://www.dimex.tech/dash" target="_blank" class="btn-gold"><i class="fa-solid fa-vault"></i> Open Staking (www.dimex.tech/dash)</a>
@@ -398,11 +398,11 @@
             <p>Native Supply (1000 Cr DSC)</p>
         </div>
         <div class="stat-card">
-            <h3>1623</h3>
+            <h3>1723</h3>
             <p>Native Chain ID</p>
         </div>
         <div class="stat-card">
-            <h3>DSC</h3>
+            <h3>DMXC</h3>
             <p>Native Coin Symbol</p>
         </div>
         <div class="stat-card">
@@ -418,19 +418,19 @@
         <div class="rpc-grid">
             <div class="rpc-item">
                 <span>Network Name</span>
-                <strong>DimeX Smart Chain</strong>
+                <strong>DimeX Chain</strong>
             </div>
             <div class="rpc-item">
                 <span>Symbol</span>
-                <strong>DSC</strong>
+                <strong>DMXC</strong>
             </div>
             <div class="rpc-item">
                 <span>Chain ID</span>
-                <strong>1623</strong>
+                <strong>1723</strong>
             </div>
             <div class="rpc-item">
                 <span>RPC URL</span>
-                <strong style="color: var(--accent-cyan);">https://rpc.dimex.world</strong>
+                <strong style="color: var(--accent-cyan);">https://rpc.dimexchain.tech</strong>
             </div>
             <div class="rpc-item">
                 <span>Decimals</span>
@@ -492,7 +492,7 @@
         <div>
             <p>&copy; 2026 DimeX Chain Ecosystem. All Rights Reserved.</p>
             <p class="footer-contact">
-                <i class="fa-solid fa-envelope" style="color: var(--primary-gold);"></i> Contact: <a href="mailto:info@dimex.world">info@dimex.world</a>
+                <i class="fa-solid fa-envelope" style="color: var(--primary-gold);"></i> Contact: <a href="mailto:info@dimexchain.tech">info@dimex.world</a>
             </p>
         </div>
         <div class="socials">
@@ -510,15 +510,15 @@
                 await window.ethereum.request({
                     method: 'wallet_addEthereumChain',
                     params: [{
-                        chainId: '0x657', // 1623 in Hexadecimal
-                        chainName: 'DimeX Smart Chain',
+                        chainId: '0x657', // 1723 in Hexadecimal
+                        chainName: 'DimeX Chain',
                         nativeCurrency: {
                             name: 'DimeX Smart Chain Native Coin',
-                            symbol: 'DSC',
+                            symbol: 'DMXC',
                             decimals: 18
                         },
-                        rpcUrls: ['https://rpc.dimex.world'],
-                        blockExplorerUrls: ['https://explorer.dimex.world']
+                        rpcUrls: ['https://rpc.dimexchain.tech'],
+                        blockExplorerUrls: ['https://explorer.dimexchain.tech']
                     }]
                 });
             } catch (error) {
